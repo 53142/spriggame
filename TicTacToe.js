@@ -4,7 +4,7 @@ https://sprig.hackclub.com/gallery/getting_started
 
 @title: TicTacToe
 @author: Benjamin
-@tags: []
+@tags: [tictactoe,tic-tac-toe]
 @addedOn: 2024-00-00
 */
 
@@ -18,6 +18,7 @@ let board = [
   ["", "", ""],
   ["", "", ""]
 ];
+gameover = false;
 
 setLegend(
   [player, bitmap`
@@ -91,7 +92,7 @@ setLegend(
 );
 
 
-const level = map`
+let level = map`
 ...
 .p.
 ...`;
@@ -102,6 +103,7 @@ setSolids([x, o]);
 setBackground(background);
 
 function gameOver(winner) {
+  gameover = true
   if (winner == "x") {
     addText(`Game over. X won!`, {
     x: 2, 
@@ -119,45 +121,71 @@ function gameOver(winner) {
     addText(`Game over.`, {
     x: 4, 
     y: 6, 
-    color: color`6`
+    color: color`9`
   })
     addText(`It was a draw!`, {
     x: 3, 
     y: 8, 
-    color: color`6`
+    color: color`9`
   })
   }
+  addText(`Press J to restart`, {
+    x: 1, 
+    y: 10, 
+    color: color`D`
+  })
 }
 
 const restartGame = async () => {
+  clearText();
+  gameover = false
   // Remove all x's
   getAll(x).forEach((x) => {
     x.remove();
   });
   // Remove all o's
   getAll(o).forEach((o) => {
-    x.remove();
+    o.remove();
   });
+  
+  // Clear Board
+  board = [
+  ["", "", ""],
+  ["", "", ""],
+  ["", "", ""]
+];
 }
 
 // inputs for player movement control
 onInput("w", () => {
-  getFirst(player).y -= 1;
+  if (!gameover) {
+    getFirst(player).y -= 1;
+  }
 });
 
 onInput("a", () => {
-  getFirst(player).x -= 1;
+  if (!gameover) {
+    getFirst(player).x -= 1;
+  }
 });
 
 onInput("s", () => {
-  getFirst(player).y += 1; // positive y is downwards
+  if (!gameover) {
+    getFirst(player).y += 1;
+  }
 });
 
 onInput("d", () => {
-  getFirst(player).x += 1;
+  if (!gameover) {
+    getFirst(player).x += 1;
+  }
 });
 
 onInput("j", () => {
+  if (gameover) {
+    restartGame();
+    return;
+  }
 
   let playerPosition = [getFirst(player).x, getFirst(player).y];
 
@@ -223,16 +251,18 @@ onInput("j", () => {
   }
 
   //Check for draw
-  counter = 0
-  for (let i = 0; i<3;i++) {
-    for (let j = 0;j<3;j++) {
-      if (board[i][j] == "") {
-        counter++
+  if (!gameover) {
+    counter = 0
+    for (let i = 0; i<3;i++) {
+      for (let j = 0;j<3;j++) {
+        if (board[i][j] == "") {
+          counter++
+        }
       }
     }
-  }
-  if (counter == 0) {
-    gameOver("draw")
+    if (counter == 0) {
+      gameOver("draw")
+    }
   }
   turn = !turn;
 });
