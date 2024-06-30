@@ -14,13 +14,13 @@ const o = "o";
 const background = "b";
 let turn = false;
 let board = [
-  [1,3.5,3],
-  [4.5,2.5,0.5],
-  [2,1.5,4]
+  ["", "", ""],
+  ["", "", ""],
+  ["", "", ""]
 ];
 
 setLegend(
-  [ player, bitmap`
+  [player, bitmap`
 ................
 ................
 ................
@@ -36,8 +36,8 @@ setLegend(
 ................
 ................
 ................
-................` ],
-  [ x, bitmap`
+................`],
+  [x, bitmap`
 ................
 ................
 ................
@@ -54,7 +54,7 @@ setLegend(
 ................
 ................
 ................`],
-  [ o, bitmap`
+  [o, bitmap`
 ................
 ................
 ................
@@ -71,7 +71,7 @@ setLegend(
 ................
 ................
 ................`],
-  [ background, bitmap`
+  [background, bitmap`
 0000000000000000
 0..............0
 0..............0
@@ -98,9 +98,36 @@ const level = map`
 
 setMap(level);
 
-setSolids ([ x, o]);
+setSolids([x, o]);
 setBackground(background);
 
+function gameOver(winner) {
+  if (winner == "x") {
+    addText(`Game over. X won!`, {
+    x: 2, 
+    y: 6, 
+    color: color`3`
+  })
+  } else if (winner == "o") {
+    addText(`Game over. O won!`, {
+    x: 2, 
+    y: 6, 
+    color: color`5`
+  })
+  }
+  else {
+    addText(`Game over.`, {
+    x: 4, 
+    y: 6, 
+    color: color`6`
+  })
+    addText(`It was a draw!`, {
+    x: 3, 
+    y: 8, 
+    color: color`6`
+  })
+  }
+}
 
 const restartGame = async () => {
   // Remove all x's
@@ -111,16 +138,6 @@ const restartGame = async () => {
   getAll(o).forEach((o) => {
     x.remove();
   });
-}
-
-function checkSum(sum) {
-  if (sum == 30) {
-    console.log("O won");
-    sum=0
-  } else if (sum == 15) {
-    console.log("X won");
-    sum=0
-  }
 }
 
 // inputs for player movement control
@@ -141,54 +158,81 @@ onInput("d", () => {
 });
 
 onInput("j", () => {
-  console.log("Board:", board);
 
   let playerPosition = [getFirst(player).x, getFirst(player).y];
-  
+
   // Check if can place in tile
   if (getTile(playerPosition[0], playerPosition[1]).length > 1) {
     return;
   }
-  
+
   if (!turn) {
     // Place X
     addSprite(playerPosition[0], playerPosition[1], x);
-    board[playerPosition[1]][playerPosition[0]]*=2;
-  }
-  else {
-    // Place O
+    board[playerPosition[1]][playerPosition[0]] = "x";
+  } else {
+    // Place Os
     addSprite(playerPosition[0], playerPosition[1], o);
-
-    //Adjust magic board
-    board[playerPosition[1]][playerPosition[0]]*=4;
+    board[playerPosition[1]][playerPosition[0]] = "o";
   }
 
-  // Check for winner using magic square
-  
-  // Check rows
-  let sum = 0;
-  for (let j = 0; j<3;j++) {
-    for (let i = 0; i<3;i++) { 
-      sum = sum + board[j][i];
+  // Check for winner
+  console.log("board", board)
+  // Check rows)
+  if (board[0][0] == board[0][1] && board[0][1] == board[0][2] && board[0][2] == "x") {
+    gameOver("x");
+  } else if (board[0][0] == board[0][1] && board[0][1] == board[0][2] && board[0][2] == "o") {
+    gameOver("o");
+  }
+  if (board[1][0] == board[1][1] && board[1][1] == board[1][2] && board[1][2] == "x") {
+    gameOver("x");
+  } else if (board[1][0] == board[1][1] && board[1][1] == board[1][2] && board[1][2] == "o") {
+    gameOver("o");
+  }
+  if (board[2][0] == board[2][1] && board[2][1] == board[2][2] && board[2][2] == "x") {
+    gameOver("x");
+  } else if (board[2][0] == board[2][1] && board[2][1] == board[2][2] && board[2][2] == "o") {
+    gameOver("o");
+  }
+  // Check columns
+  if (board[0][0] == board[1][0] && board[1][0] == board[2][0] && board[2][0] == "x") {
+    gameOver("x");
+  } else if (board[0][0] == board[1][0] && board[1][0] == board[2][0] && board[2][0] == "o") {
+    gameOver("o");
+  }
+  if (board[0][1] == board[1][1] && board[1][1] == board[2][1] && board[2][1] == "x") {
+    gameOver("x");
+  } else if (board[0][1] == board[1][1] && board[1][1] == board[2][1] && board[2][1] == "o") {
+    gameOver("o");
+  }
+  if (board[0][2] == board[1][2] && board[1][2] == board[2][2] && board[2][2] == "x") {
+    gameOver("x");
+  } else if (board[0][2] == board[1][2] && board[1][2] == board[2][2] && board[2][2] == "o") {
+    gameOver("o");
+  }
+  //Check diagonals
+  if (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[2][2] == "x") {
+    gameOver("x");
+  } else if (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[2][2] == "o") {
+    gameOver("o");
+  }
+  if (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[2][0] == "x") {
+    gameOver("x");
+  } else if (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[2][0] == "o") {
+    gameOver("o");    
+  }
+
+  //Check for draw
+  counter = 0
+  for (let i = 0; i<3;i++) {
+    for (let j = 0;j<3;j++) {
+      if (board[i][j] == "") {
+        counter++
+      }
     }
-    checkSum(sum)
-    sum=0
   }
-  // Check diagonals
-  console.log("here")
-  for (let i = 0; i<3;i++) { 
-    sum = sum + board[i][i];
+  if (counter == 0) {
+    gameOver("draw")
   }
-  checkSum(sum)
-  sum=0
-
-  for (let i = 2; i > -1;i--) { 
-    console.log("i",i)
-    sum = sum + board[i][i];
-  }
-  checkSum(sum)
-  sum=0
-
-  
   turn = !turn;
 });
